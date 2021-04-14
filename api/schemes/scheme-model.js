@@ -94,13 +94,26 @@ function findById(scheme_id) {
         "steps": []
       }
   */
-  // if (!scheme_id) {
-  //   return
-  // }
+
   return db('schemes as sc')
     .leftJoin('steps as st', 'st.scheme_id', 'sc.scheme_id')
-    .orderBy('st.step_number', 'asc')
     .where('sc.scheme_id', scheme_id)
+    .orderBy('st.step_number', 'asc')
+    .then((steps) => {
+      if (steps.length > 0) {
+        return {
+          scheme_id: parseInt(scheme_id),
+          scheme_name: steps[0].scheme_name,
+          steps: steps[0].step_id
+            ? steps.map(({ step_id, step_number, instructions }) => {
+                return { step_id, step_number, instructions }
+              })
+            : [],
+        }
+      } else {
+        return null
+      }
+    })
 }
 
 function findSteps(scheme_id) {
